@@ -1,0 +1,13 @@
+<arooa:descriptor  xmlns:arooa="http://rgordon.co.uk/oddjob/arooa"
+    prefix="aws" namespace="oddjob:aws">
+	<components>
+		<arooa:bean-def element='ec2-instances'
+						className='org.oddjob.aws.Ec2DescribeInstancesJob'/>
+		<arooa:bean-def element='ec2-run-instances'
+						className='org.oddjob.aws.Ec2RunInstancesJob'/>
+		<arooa:bean-def element='ec2-start-instances'
+						className='org.oddjob.aws.Ec2StartInstancesJob'/>
+		<arooa:bean-def element='ec2-stop-instances'
+						className='org.oddjob.aws.Ec2StopInstancesJob'/>
+	</components>
+</arooa:descriptor>

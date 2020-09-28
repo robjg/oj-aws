@@ -1,0 +1,5 @@
+Oddjob AWS Jobs
+Copyright 2020-Present R Gordon Ltd
+
+This product includes software developed at
+Amazon (https://www.aws.amazon.com/).
