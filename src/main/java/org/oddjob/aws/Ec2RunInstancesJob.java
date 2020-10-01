@@ -3,23 +3,30 @@ package org.oddjob.aws;
 import org.oddjob.util.OddjobUnexpectedException;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.ResourceType;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @oddjob.description
+ */
 public class Ec2RunInstancesJob extends Ec2Base {
 
     private String imageId;
 
     private String instanceType;
 
-    private String instanceId;
-
     private int minCount;
 
     private int maxCount;
+
+    private Map<String, String> tags;
+
+    private String instanceId;
 
 
     @Override
@@ -39,12 +46,16 @@ public class Ec2RunInstancesJob extends Ec2Base {
             maxCount = 1;
         }
 
-        RunInstancesRequest request = RunInstancesRequest.builder()
+        RunInstancesRequest.Builder requestBuilder = RunInstancesRequest.builder()
                 .imageId(imageId)
                 .instanceType(instanceType)
                 .minCount(minCount)
-                .maxCount(maxCount)
-                .build();
+                .maxCount(maxCount);
+
+        tagsFrom(this.tags, ResourceType.KEY_PAIR)
+                .ifPresent(requestBuilder::tagSpecifications);
+
+        RunInstancesRequest request =  requestBuilder.build();
 
         RunInstancesResponse response = ec2.runInstances(request);
 
@@ -72,10 +83,6 @@ public class Ec2RunInstancesJob extends Ec2Base {
         this.instanceType = instanceType;
     }
 
-    public String getInstanceId() {
-        return instanceId;
-    }
-
     public int getMinCount() {
         return minCount;
     }
@@ -91,4 +98,17 @@ public class Ec2RunInstancesJob extends Ec2Base {
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
     }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
 }

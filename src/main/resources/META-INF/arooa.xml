@@ -1,13 +1,232 @@
 <arooa:descriptor  xmlns:arooa="http://rgordon.co.uk/oddjob/arooa"
     prefix="aws" namespace="oddjob:aws">
 	<components>
-		<arooa:bean-def element='ec2-instances'
-						className='org.oddjob.aws.Ec2DescribeInstancesJob'/>
+		<arooa:bean-def element='ec2-describe-key-pairs'
+						className='org.oddjob.aws.Ec2DescribeKeyPairsJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Key Details">
+							<formItems>
+								<design:text property="keyPairIds" title="Key Pair Ids"/>
+								<design:text property="keyNames" title="Key Names"/>
+								<design:single property="filters" title="Filters"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-create-key-pair'
+						className='org.oddjob.aws.Ec2CreateKeyPairJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Key Details">
+							<formItems>
+								<design:text property="keyName" title="Key Name"/>
+								<design:single property="output" title="Private Key Output"/>
+								<design:single property="tags" title="Tags"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-delete-key-pair'
+						className='org.oddjob.aws.Ec2DeleteKeyPairJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Key Details">
+							<formItems>
+								<design:text property="keyPairId" title="Key Pair Id"/>
+								<design:text property="keyName" title="Key Name"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-describe-security-groups'
+						className='org.oddjob.aws.Ec2DescribeSecurityGroupsJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Request Criteria">
+							<formItems>
+								<design:text property="groupIds" title="Security Group Ids"/>
+								<design:text property="groupNames" title="Security Group Names"/>
+								<design:single property="filters" title="Filters"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-create-security-group'
+						className='org.oddjob.aws.Ec2CreateSecurityGroupJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Security Group Details">
+							<formItems>
+								<design:text property="groupName" title="Group Name"/>
+								<design:text property="description" title="Description"/>
+								<design:text property="vpcId" title="VPC Id"/>
+								<design:single property="tags" title="Tags"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-authorize-security-group'
+						className='org.oddjob.aws.Ec2AuthorizeSecurityGroupJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Security Group Details">
+							<formItems>
+								<design:text property="groupId" title="Group Id"/>
+								<design:text property="groupName" title="Group Name"/>
+								<design:single property="inboundPermissions" title="Inbound Permissions"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-delete-security-group'
+						className='org.oddjob.aws.Ec2DeleteSecurityGroupJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Security Group Details">
+							<formItems>
+								<design:text property="groupId" title="Group Id"/>
+								<design:text property="groupName" title="Group Name"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-describe-instances'
+						className='org.oddjob.aws.Ec2DescribeInstancesJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Request Criteria">
+							<formItems>
+								<design:text property="instanceIds" title="Instance Ids"/>
+								<design:single property="filters" title="Filters"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
 		<arooa:bean-def element='ec2-run-instances'
-						className='org.oddjob.aws.Ec2RunInstancesJob'/>
+						className='org.oddjob.aws.Ec2RunInstancesJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Instances Details">
+							<formItems>
+								<design:text property="imageId" title="Image Id"/>
+								<design:text property="instanceType" title="Instance Type"/>
+								<design:text property="minCount" title="Min Count"/>
+								<design:text property="maxCount" title="Max Count"/>
+								<design:single property="tags" title="Tags"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
 		<arooa:bean-def element='ec2-start-instances'
 						className='org.oddjob.aws.Ec2StartInstancesJob'/>
 		<arooa:bean-def element='ec2-stop-instances'
 						className='org.oddjob.aws.Ec2StopInstancesJob'/>
 	</components>
+	<values>
+		<arooa:bean-def element='ec2-filter'
+						className='org.oddjob.aws.Ec2FilterType'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:text property="name" title="Name"/>
+						<design:text property="values" title="Values"/>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-ip-permission'
+						className='org.oddjob.aws.Ec2IpPermissionType'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:text property="ipProtocol" title="Protocol"/>
+						<design:text property="portRange" title="Port Range"/>
+						<design:text property="ipRanges" title="IP Ranges"/>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+	</values>
 </arooa:descriptor>
