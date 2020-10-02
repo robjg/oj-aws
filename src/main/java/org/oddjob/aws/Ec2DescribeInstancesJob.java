@@ -1,22 +1,19 @@
 package org.oddjob.aws;
 
 import org.oddjob.arooa.deploy.annotations.ArooaAttribute;
-import org.oddjob.framework.adapt.HardReset;
-import org.oddjob.framework.adapt.SoftReset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * @oddjob.description Describe EC2 Instances.
  */
-public class Ec2DescribeInstancesJob extends Ec2Base {
+public class Ec2DescribeInstancesJob extends Ec2InstancesResponseBase {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2DescribeInstancesJob.class);
 
@@ -25,14 +22,6 @@ public class Ec2DescribeInstancesJob extends Ec2Base {
     private Filter[] filters;
 
     private List<Reservation> reservations;
-
-    private List<Instance> instances;
-
-    private Map<String, InstanceBean> detailById;
-
-    private int size;
-
-    private String[] responseInstanceIds;
 
     @Override
     protected void withEc2(Ec2Client ec2) {
@@ -57,36 +46,22 @@ public class Ec2DescribeInstancesJob extends Ec2Base {
 
             this.reservations = response.reservations();
 
-            this.instances = reservations.stream()
+            List<Instance> instances = reservations.stream()
                     .filter(Reservation::hasInstances)
                     .flatMap(r -> r.instances().stream())
                     .collect(Collectors.toList());
 
-            this.size = instances.size();
+            populateInstances(instances);
 
-            this.detailById = this.instances
-                    .stream()
-                    .collect(Collectors.toMap(Instance::instanceId,
-                            InstanceBean::new));
-
-            this.responseInstanceIds = this.instances
-                    .stream()
-                    .map(Instance::instanceId)
-                    .toArray(String[]::new);
-
-            logger.info("Received response for {} Instances", this.size);
+            logger.info("Received response for {} Instances", getSize());
         } else {
             logger.info("No Instances for search criteria");
         }
     }
 
-    @SoftReset
-    @HardReset
-    public void reset() {
+    @Override
+    protected void moreRest() {
         this.reservations = null;
-        this.instances = null;
-        this.size = 0;
-        this.responseInstanceIds = null;
     }
 
     public String[] getInstanceIds() {
@@ -110,52 +85,4 @@ public class Ec2DescribeInstancesJob extends Ec2Base {
         return reservations;
     }
 
-    public List<Instance> getInstances() {
-        return instances;
-    }
-
-    public InstanceBean getDetailById(String groupId) {
-        return Optional.ofNullable(this.detailById)
-                .map(d -> d.get(groupId))
-                .orElse(null);
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public String[] getResponseInstanceIds() {
-        return responseInstanceIds;
-    }
-
-    public static class InstanceBean {
-
-        private final String state;
-
-        private final String publicIpAddress;
-
-        private final String publicDnsName;
-
-        InstanceBean(Instance instance) {
-
-            this.state = Optional.ofNullable(instance.state())
-                    .map(InstanceState::nameAsString)
-                    .orElse(null);
-            this.publicIpAddress = instance.publicIpAddress();
-            this.publicDnsName = instance.publicDnsName();
-
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        public String getPublicIpAddress() {
-            return publicIpAddress;
-        }
-
-        public String getPublicDnsName() {
-            return publicDnsName;
-        }
-    }
 }

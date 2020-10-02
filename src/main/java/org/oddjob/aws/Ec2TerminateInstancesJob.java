@@ -4,14 +4,14 @@ import org.oddjob.arooa.deploy.annotations.ArooaAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
 
 import java.util.Optional;
 
-public class Ec2StopInstancesJob extends Ec2InstanceStateChangeBase {
+public class Ec2TerminateInstancesJob extends Ec2InstanceStateChangeBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(Ec2RunInstancesJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(Ec2TerminateInstancesJob.class);
 
     private String[] instanceIds;
 
@@ -21,22 +21,22 @@ public class Ec2StopInstancesJob extends Ec2InstanceStateChangeBase {
         String[] instanceIds = Optional.ofNullable(this.instanceIds)
                 .orElseThrow(() -> new IllegalArgumentException("No Instance Id"));
 
-        StopInstancesRequest request = StopInstancesRequest.builder()
+        TerminateInstancesRequest request = TerminateInstancesRequest.builder()
                 .instanceIds(instanceIds)
                 .build();
 
-        StopInstancesResponse response = ec2.stopInstances(request);
+        TerminateInstancesResponse response = ec2.terminateInstances(request);
 
-        if (response.hasStoppingInstances()) {
+        if (response.hasTerminatingInstances()) {
 
-            populateStateChanges(response.stoppingInstances());
+            populateStateChanges(response.terminatingInstances());
 
-            logger.info("Received Stop response with {} State Changes",
+            logger.info("Received Terminating response with {} State Changes",
                     getSize());
         }
         else {
 
-            logger.info("Received Stop response with no State Changes");
+            logger.info("Received Terminating response with no State Changes");
         }
     }
 
@@ -48,4 +48,5 @@ public class Ec2StopInstancesJob extends Ec2InstanceStateChangeBase {
     public void setInstanceIds(String... instanceIds) {
         this.instanceIds = instanceIds;
     }
+
 }

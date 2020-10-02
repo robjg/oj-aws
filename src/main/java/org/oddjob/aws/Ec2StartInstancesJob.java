@@ -1,21 +1,19 @@
 package org.oddjob.aws;
 
 import org.oddjob.arooa.deploy.annotations.ArooaAttribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.InstanceState;
-import software.amazon.awssdk.services.ec2.model.InstanceStateChange;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StartInstancesResponse;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class Ec2StartInstancesJob extends Ec2Base {
+public class Ec2StartInstancesJob extends Ec2InstanceStateChangeBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(Ec2StartInstancesJob.class);
 
     private String[] instanceIds;
-
-    private List<InstanceState> instanceStates;
 
     @Override
     protected void withEc2(Ec2Client ec2) {
@@ -31,11 +29,14 @@ public class Ec2StartInstancesJob extends Ec2Base {
 
             if (response.hasStartingInstances()) {
 
-                List<InstanceStateChange> stateChanges = response.startingInstances();
+                populateStateChanges(response.startingInstances());
 
-                this.instanceStates = stateChanges.stream()
-                        .map(InstanceStateChange::currentState)
-                        .collect(Collectors.toList());
+                logger.info("Received Starting response with {} State Changes",
+                        getSize());
+            }
+            else {
+
+                logger.info("Received Starting response with no State Changes");
             }
     }
 
@@ -46,9 +47,5 @@ public class Ec2StartInstancesJob extends Ec2Base {
     @ArooaAttribute
     public void setInstanceIds(String... instanceIds) {
         this.instanceIds = instanceIds;
-    }
-
-    public List<InstanceState> getInstanceStates() {
-        return instanceStates;
     }
 }

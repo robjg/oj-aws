@@ -15,7 +15,7 @@ class Ec2FilterTypeTest {
 
         Ec2FilterType test = new Ec2FilterType();
         test.setName("tag-values");
-        test.setValues("Test,Foo");
+        test.setValues("Test","Foo");
 
         Filter result = test.toValue();
 

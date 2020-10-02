@@ -1,20 +1,25 @@
 package org.oddjob.aws;
 
-import org.oddjob.util.OddjobUnexpectedException;
+import org.oddjob.arooa.deploy.annotations.ArooaAttribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.ResourceType;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
- * @oddjob.description
+ * @oddjob.description Create new EC2 Instances.
+ *
+ *
  */
-public class Ec2RunInstancesJob extends Ec2Base {
+public class Ec2RunInstancesJob extends Ec2InstancesResponseBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(Ec2RunInstancesJob.class);
 
     private String imageId;
 
@@ -24,10 +29,13 @@ public class Ec2RunInstancesJob extends Ec2Base {
 
     private int maxCount;
 
+    private String keyName;
+
+    private String[] securityGroupIds;
+
+    private String[] securityGroups;
+
     private Map<String, String> tags;
-
-    private String instanceId;
-
 
     @Override
     protected void withEc2(Ec2Client ec2) {
@@ -52,19 +60,32 @@ public class Ec2RunInstancesJob extends Ec2Base {
                 .minCount(minCount)
                 .maxCount(maxCount);
 
-        tagsFrom(this.tags, ResourceType.KEY_PAIR)
+        Optional.ofNullable(this.keyName)
+                .ifPresent(requestBuilder::keyName);
+
+        Optional.ofNullable(this.securityGroupIds)
+                .ifPresent(requestBuilder::securityGroupIds);
+
+        Optional.ofNullable(this.securityGroups)
+                .ifPresent(requestBuilder::securityGroups);
+
+        tagsFrom(this.tags, ResourceType.INSTANCE)
                 .ifPresent(requestBuilder::tagSpecifications);
 
         RunInstancesRequest request =  requestBuilder.build();
 
         RunInstancesResponse response = ec2.runInstances(request);
 
-        List<Instance> instances = response.instances();
-        if (instances == null || instances.size() != 1) {
-            throw new OddjobUnexpectedException("Instances not as expected: " + instances);
-        }
+        if (response.hasInstances()) {
 
-        this.instanceId = instances.get(0).instanceId();
+            populateInstances(response.instances());
+
+            logger.info("Received Run Instance Response for {} Instances", getSize());
+        }
+        else {
+            logger.info("No Instances returned for request {}",
+                    response.responseMetadata().requestId());
+        }
     }
 
     public String getImageId() {
@@ -107,8 +128,30 @@ public class Ec2RunInstancesJob extends Ec2Base {
         this.tags = tags;
     }
 
-    public String getInstanceId() {
-        return instanceId;
+    public String getKeyName() {
+        return keyName;
+    }
+
+    public void setKeyName(String keyName) {
+        this.keyName = keyName;
+    }
+
+    public String[] getSecurityGroupIds() {
+        return securityGroupIds;
+    }
+
+    @ArooaAttribute
+    public void setSecurityGroupIds(String[] securityGroupIds) {
+        this.securityGroupIds = securityGroupIds;
+    }
+
+    public String[] getSecurityGroups() {
+        return securityGroups;
+    }
+
+    @ArooaAttribute
+    public void setSecurityGroups(String[] securityGroups) {
+        this.securityGroups = securityGroups;
     }
 
 }

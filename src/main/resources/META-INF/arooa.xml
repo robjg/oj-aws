@@ -192,6 +192,9 @@
 								<design:text property="instanceType" title="Instance Type"/>
 								<design:text property="minCount" title="Min Count"/>
 								<design:text property="maxCount" title="Max Count"/>
+								<design:text property="keyName" title="Key Name"/>
+								<design:text property="securityGroupIds" title="Security Group Ids"/>
+								<design:text property="securityGroups" title="Security Groups"/>
 								<design:single property="tags" title="Tags"/>
 							</formItems>
 						</design:group>
@@ -200,9 +203,65 @@
 			</design>
 		</arooa:bean-def>
 		<arooa:bean-def element='ec2-start-instances'
-						className='org.oddjob.aws.Ec2StartInstancesJob'/>
+						className='org.oddjob.aws.Ec2StartInstancesJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Instances Details">
+							<formItems>
+								<design:text property="instanceIds" title="Instance Ids"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
 		<arooa:bean-def element='ec2-stop-instances'
-						className='org.oddjob.aws.Ec2StopInstancesJob'/>
+						className='org.oddjob.aws.Ec2StopInstancesJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Instances Details">
+							<formItems>
+								<design:text property="instanceIds" title="Instance Ids"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
+		<arooa:bean-def element='ec2-terminate-instances'
+						className='org.oddjob.aws.Ec2TerminateInstancesJob'>
+			<design>
+				<design:form xmlns:design="arooa:design">
+					<formItems>
+						<design:group bordered="true" title="General">
+							<formItems>
+								<design:text property="name" title="Name"/>
+								<design:single property="credentialsProvider" title="Credentials"/>
+							</formItems>
+						</design:group>
+						<design:group bordered="true" title="Instances Details">
+							<formItems>
+								<design:text property="instanceIds" title="Instance Ids"/>
+							</formItems>
+						</design:group>
+					</formItems>
+				</design:form>
+			</design>
+		</arooa:bean-def>
 	</components>
 	<values>
 		<arooa:bean-def element='ec2-filter'
