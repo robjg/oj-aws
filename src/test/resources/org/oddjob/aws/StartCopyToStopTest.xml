@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<oddjob id="oddjob">
+    <job>
+        <cascade>
+            <jobs>
+                <properties name="Common Properties">
+                    <values>
+                        <value key="ojitest.work.dir" value="./"/>
+                        <value key="ojitest.key.name" value="TestKeyPair"/>
+                        <file file="${ojitest.work.dir}/${ojitest.key.name}.pem" key="ojitest.key.file"/>
+                        <value key="ojitest.instance.image.id" value="ami-09b89ad3c5769cca2"/>
+                        <value key="ojitest.instance.type" value="t2.micro"/>
+                        <value key="ojitest.security.group.name" value="Oddjob-Test-SG"/>
+                    </values>
+                </properties>
+                <variables id="vars">
+                    <tags>
+                        <map>
+                            <values>
+                                <value key="purpose" value="OddjobTest"/>
+                            </values>
+                        </map>
+                    </tags>
+                    <filters>
+                        <list>
+                            <values>
+                                <aws:ec2-filter name="tag:purpose" values="OddjobTest" xmlns:aws="oddjob:aws"/>
+                            </values>
+                        </list>
+                    </filters>
+                </variables>
+                <cascade name="Setup Security">
+                    <jobs>
+                        <state:if xmlns:state="http://rgordon.co.uk/oddjob/state">
+                            <jobs>
+                                <exists file="${ojitest.key.file}" name="Check Key File Exists"/>
+                                <state:flag name="Then Do Nothing"/>
+                                <aws:ec2-create-key-pair keyName="${ojitest.key.name}" name="Else Create Key Pair" xmlns:aws="oddjob:aws">
+                                    <output>
+                                        <file file="${ojitest.key.file}"/>
+                                    </output>
+                                    <tags>
+                                        <value value="${vars.tags}"/>
+                                    </tags>
+                                </aws:ec2-create-key-pair>
+                            </jobs>
+                        </state:if>
+                        <aws:ec2-describe-security-groups id="findSecurityGroups" name="Find Test Security Group" xmlns:aws="oddjob:aws">
+                            <filters>
+                                <value value="${vars.filters}"/>
+                            </filters>
+                        </aws:ec2-describe-security-groups>
+                        <state:if xmlns:state="http://rgordon.co.uk/oddjob/state">
+                            <jobs>
+                                <check lt="1" name="Check Existing Security Group" value="${findSecurityGroups.size}"/>
+                                <sequential name="Create Security Group">
+                                    <jobs>
+                                        <web:client id="myIp" name="Get Our Ip Address" url="http://bot.whatismyipaddress.com/" xmlns:web="oddjob:web"/>
+                                        <aws:ec2-create-security-group description="Oddjob Test Security Group " groupName="${ojitest.security.group.name}" id="createSecurityGroup" name="Create Security Group" xmlns:aws="oddjob:aws">
+                                            <tags>
+                                                <value value="${vars.tags}"/>
+                                            </tags>
+                                        </aws:ec2-create-security-group>
+                                        <properties name="Extract Security Group Id as Property">
+                                            <values>
+                                                <value key="ojitest.security.group.id" value="${createSecurityGroup.groupId}"/>
+                                            </values>
+                                        </properties>
+                                        <aws:ec2-authorize-security-group groupId="${ojitest.security.group.id}" name="Create Inbound Rules" xmlns:aws="oddjob:aws">
+                                            <inboundPermissions>
+                                                <aws:ec2-ip-permission ipProtocol="tcp" ipRanges="${myIp.responseBody}/32" portRange="22"/>
+                                            </inboundPermissions>
+                                        </aws:ec2-authorize-security-group>
+                                    </jobs>
+                                </sequential>
+                                <properties name="Use Existing Group Id">
+                                    <values>
+                                        <value key="ojitest.security.group.id" value="${findSecurityGroups.responseGroupIds[0]}"/>
+                                    </values>
+                                </properties>
+                            </jobs>
+                        </state:if>
+                    </jobs>
+                </cascade>
+                <aws:ec2-run-instances id="createInstance" imageId="${ojitest.instance.image.id}" instanceType="${ojitest.instance.type}" keyName="${ojitest.key.name}" name="Create An Instance" securityGroupIds="${ojitest.security.group.id}" xmlns:aws="oddjob:aws">
+                    <tags>
+                        <value value="${vars.tags}"/>
+                    </tags>
+                </aws:ec2-run-instances>
+                <properties name="Extract Instance Id Property">
+                    <values>
+                        <value key="ojitest.instance.id" value="${createInstance.responseInstanceIds[0]}"/>
+                    </values>
+                </properties>
+                <oddjob file="${oddjob.dir}/CheckInstanceState.xml" name="Check Instance Running">
+                    <properties>
+                        <properties>
+                            <values>
+                                <value key="instance.id" value="${ojitest.instance.id}"/>
+                                <value key="expected.state" value="running"/>
+                            </values>
+                        </properties>
+                    </properties>
+                </oddjob>
+                <aws:ec2-stop-instances instanceIds="${ojitest.instance.id}" xmlns:aws="oddjob:aws"/>
+                <oddjob file="${oddjob.dir}/CheckInstanceState.xml" name="Check Instance Stopped">
+                    <properties>
+                        <properties>
+                            <values>
+                                <value key="instance.id" value="${ojitest.instance.id}"/>
+                                <value key="expected.state" value="stopped"/>
+                            </values>
+                        </properties>
+                    </properties>
+                </oddjob>
+                <aws:ec2-start-instances instanceIds="${ojitest.instance.id}" name="Start The Instance" xmlns:aws="oddjob:aws"/>
+                <oddjob file="${oddjob.dir}/CheckInstanceState.xml" id="checkRunning" name="Check Instance Running">
+                    <properties>
+                        <properties>
+                            <values>
+                                <value key="instance.id" value="${ojitest.instance.id}"/>
+                                <value key="expected.state" value="running"/>
+                            </values>
+                        </properties>
+                    </properties>
+                </oddjob>
+                <properties name="Extract DNS name Property">
+                    <values>
+                        <value key="ojitest.instance.publicDns" value="${checkRunning/describeInstance.detailById(${ojitest.instance.id}).publicDnsName}"/>
+                    </values>
+                </properties>
+                <scheduling:retry name="Retry SSH " xmlns:scheduling="http://rgordon.co.uk/oddjob/scheduling">
+                    <schedule>
+                        <schedules:count count="5" xmlns:schedules="http://rgordon.co.uk/oddjob/schedules">
+                            <refinement>
+                                <schedules:after>
+                                    <schedule>
+                                        <schedules:interval interval="0:00:03"/>
+                                    </schedule>
+                                </schedules:after>
+                            </refinement>
+                        </schedules:count>
+                    </schedule>
+                    <job>
+                        <ssh:cascade xmlns:ssh="oddjob:ssh">
+                            <connection>
+                                <ssh:connection host="${ojitest.instance.publicDns}" user="ec2-user">
+                                    <keyIdentityProvider>
+                                        <ssh:file-keypair>
+                                            <keyFiles>
+                                                <file file="${ojitest.key.file}"/>
+                                            </keyFiles>
+                                        </ssh:file-keypair>
+                                    </keyIdentityProvider>
+                                </ssh:connection>
+                            </connection>
+                            <jobs>
+                                <ssh:exec command="if [ -e OurRemoteFile.txt ]; then rm OurRemoteFile.txt; fi"/>
+                                <ssh:scp remote="OurRemoteFile.txt">
+                                    <from>
+                                        <file file="${oddjob.dir}/TheMonths.txt"/>
+                                    </from>
+                                </ssh:scp>
+                                <ssh:exec command="cat OurRemoteFile.txt" id="catRemoteFile"/>
+                            </jobs>
+                        </ssh:cascade>
+                    </job>
+                </scheduling:retry>
+                <aws:ec2-terminate-instances instanceIds="${ojitest.instance.id}" name="Terminate Instance" xmlns:aws="oddjob:aws"/>
+                <folder name="Cleanup Jobs">
+                    <jobs>
+                        <cascade name="Clean Up Key Pairs">
+                            <jobs>
+                                <aws:ec2-describe-key-pairs id="testKeyPairs" name="Find Test Key Pairs" xmlns:aws="oddjob:aws">
+                                    <filters>
+                                        <value value="${vars.filters}"/>
+                                    </filters>
+                                </aws:ec2-describe-key-pairs>
+                                <repeat id="eachKeyId">
+                                    <values>
+                                        <value value="${testKeyPairs.responseKeyPairIds}"/>
+                                    </values>
+                                    <job>
+                                        <aws:ec2-delete-key-pair keyPairId="${eachKeyId.current}" name="Delete Key Pair" xmlns:aws="oddjob:aws"/>
+                                    </job>
+                                </repeat>
+                            </jobs>
+                        </cascade>
+                        <cascade name="Clean Up Security Groups">
+                            <jobs>
+                                <aws:ec2-describe-security-groups id="testSecurityGroups" name="Find Test Security Group" xmlns:aws="oddjob:aws">
+                                    <filters>
+                                        <value value="${vars.filters}"/>
+                                    </filters>
+                                </aws:ec2-describe-security-groups>
+                                <repeat id="eachGroupId" name="Each Security Group">
+                                    <values>
+                                        <value value="${testSecurityGroups.responseGroupIds}"/>
+                                    </values>
+                                    <job>
+                                        <aws:ec2-delete-security-group groupId="${eachGroupId.current}" name="Delete Security Group" xmlns:aws="oddjob:aws"/>
+                                    </job>
+                                </repeat>
+                            </jobs>
+                        </cascade>
+                        <sequential id="cleanupInstances" name="Cleanup Up Instances">
+                            <jobs>
+                                <aws:ec2-describe-instances id="findInstancesToClean" name="Find Instances To Clean" xmlns:aws="oddjob:aws">
+                                    <filters>
+                                        <value value="${vars.filters}"/>
+                                    </filters>
+                                </aws:ec2-describe-instances>
+                                <aws:ec2-terminate-instances instanceIds="${findInstancesToClean.responseInstanceIds}" xmlns:aws="oddjob:aws"/>
+                            </jobs>
+                        </sequential>
+                    </jobs>
+                </folder>
+            </jobs>
+        </cascade>
+    </job>
+</oddjob>
