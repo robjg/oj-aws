@@ -5,9 +5,9 @@
             <jobs>
                 <properties name="Common Properties">
                     <values>
-                        <value key="ojitest.work.dir" value="./"/>
+                        <value key="ojitest.aws.dir" value="${user.home}/.aws"/>
                         <value key="ojitest.key.name" value="TestKeyPair"/>
-                        <file file="${ojitest.work.dir}/${ojitest.key.name}.pem" key="ojitest.key.file"/>
+                        <file file="${ojitest.aws.dir}/${ojitest.key.name}.pem" key="ojitest.key.file"/>
                         <value key="ojitest.instance.image.id" value="ami-09b89ad3c5769cca2"/>
                         <value key="ojitest.instance.type" value="t2.micro"/>
                         <value key="ojitest.security.group.name" value="Oddjob-Test-SG"/>
@@ -131,7 +131,7 @@
                 </properties>
                 <scheduling:retry name="Retry SSH " xmlns:scheduling="http://rgordon.co.uk/oddjob/scheduling">
                     <schedule>
-                        <schedules:count count="5" xmlns:schedules="http://rgordon.co.uk/oddjob/schedules">
+                        <schedules:count count="2" xmlns:schedules="http://rgordon.co.uk/oddjob/schedules">
                             <refinement>
                                 <schedules:after>
                                     <schedule>

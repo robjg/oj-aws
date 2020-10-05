@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<oddjob id="oddjob">
+    <job>
+        <cascade>
+            <jobs>
+                <properties name="Setup Properties">
+                    <values>
+                        <value key="ojdeploy.aws.dir" value="${user.home}/.aws"/>
+                        <value key="ojdeploy.key.name" value="OddjobKeyPair"/>
+                        <file file="${ojdeploy.aws.dir}/${ojdeploy.key.name}.pem" key="ojdeploy.key.file"/>
+                        <value key="ojdeploy.instance.image.id" value="ami-09b89ad3c5769cca2"/>
+                        <value key="ojdeploy.instance.type" value="t2.micro"/>
+                        <value key="ojdeploy.security.group.name" value="Oddjob-Deploy-SG"/>
+                        <file file="${user.home}/projects/oj-assembly/work/ojdist/oddjob-1.6-SNAPSHOT.tar.gz" key="ojdeploy.oddjob.zip"/>
+                        <value key="ojdeploy.aws.user" value="ec2-user"/>
+                    </values>
+                </properties>
+                <exists file="${ojdeploy.oddjob.zip}" name="Check Oddjob Zip Exists"/>
+                <variables id="vars">
+                    <tags>
+                        <map>
+                            <values>
+                                <value key="purpose" value="OddjobDeploy"/>
+                            </values>
+                        </map>
+                    </tags>
+                    <filters>
+                        <list>
+                            <values>
+                                <aws:ec2-filter name="tag:purpose" values="OddjobDeploy" xmlns:aws="oddjob:aws"/>
+                            </values>
+                        </list>
+                    </filters>
+                </variables>
+                <cascade name="Setup Security">
+                    <jobs>
+                        <state:if xmlns:state="http://rgordon.co.uk/oddjob/state">
+                            <jobs>
+                                <exists file="${ojdeploy.key.file}" name="Check Key File Exists"/>
+                                <state:flag name="Then Do Nothing"/>
+                                <aws:ec2-create-key-pair keyName="${ojdeploy.key.name}" name="Else Create Key Pair" xmlns:aws="oddjob:aws">
+                                    <output>
+                                        <file file="${ojdeploy.key.file}"/>
+                                    </output>
+                                    <tags>
+                                        <value value="${vars.tags}"/>
+                                    </tags>
+                                </aws:ec2-create-key-pair>
+                            </jobs>
+                        </state:if>
+                        <aws:ec2-describe-security-groups id="findSecurityGroups" name="Find Security Group" xmlns:aws="oddjob:aws">
+                            <filters>
+                                <value value="${vars.filters}"/>
+                            </filters>
+                        </aws:ec2-describe-security-groups>
+                        <state:if xmlns:state="http://rgordon.co.uk/oddjob/state">
+                            <jobs>
+                                <check lt="1" name="Check Existing Security Group" value="${findSecurityGroups.size}"/>
+                                <sequential name="Create Security Group">
+                                    <jobs>
+                                        <web:client id="myIp" name="Get Our Ip Address" url="http://bot.whatismyipaddress.com/" xmlns:web="oddjob:web"/>
+                                        <aws:ec2-create-security-group description="Oddjob Deploy Security Group " groupName="${ojdeploy.security.group.name}" id="createSecurityGroup" name="Create Security Group" xmlns:aws="oddjob:aws">
+                                            <tags>
+                                                <value value="${vars.tags}"/>
+                                            </tags>
+                                        </aws:ec2-create-security-group>
+                                        <properties name="Extract Security Group Id as Property">
+                                            <values>
+                                                <value key="ojdeploy.security.group.id" value="${createSecurityGroup.groupId}"/>
+                                            </values>
+                                        </properties>
+                                        <aws:ec2-authorize-security-group groupId="${ojdeploy.security.group.id}" name="Create Inbound Rules" xmlns:aws="oddjob:aws">
+                                            <inboundPermissions>
+                                                <list>
+                                                    <values>
+                                                        <aws:ec2-ip-permission ipProtocol="tcp" ipRanges="${myIp.responseBody}/32" portRange="22"/>
+                                                        <aws:ec2-ip-permission ipProtocol="tcp" ipRanges="${myIp.responseBody}/32" portRange="8080"/>
+                                                    </values>
+                                                </list>
+                                            </inboundPermissions>
+                                        </aws:ec2-authorize-security-group>
+                                    </jobs>
+                                </sequential>
+                                <properties name="Use Existing Group Id">
+                                    <values>
+                                        <value key="ojdeploy.security.group.id" value="${findSecurityGroups.responseGroupIds[0]}"/>
+                                    </values>
+                                </properties>
+                            </jobs>
+                        </state:if>
+                    </jobs>
+                </cascade>
+                <cascade name="Setup Instance">
+                    <jobs>
+                        <aws:ec2-describe-instances id="findInstance" name="Find Existing Instance" xmlns:aws="oddjob:aws">
+                            <filters>
+                                <value value="${vars.filters}"/>
+                            </filters>
+                        </aws:ec2-describe-instances>
+                        <state:if xmlns:state="http://rgordon.co.uk/oddjob/state">
+                            <jobs>
+                                <check lt="1" name="Check Existing Instance" value="${findInstance.size}"/>
+                                <cascade name="Create And Get Id">
+                                    <jobs>
+                                        <aws:ec2-run-instances id="createInstance" imageId="${ojdeploy.instance.image.id}" instanceType="${ojdeploy.instance.type}" keyName="${ojdeploy.key.name}" name="Create An Instance" securityGroupIds="${ojdeploy.security.group.id}" xmlns:aws="oddjob:aws">
+                                            <tags>
+                                                <value value="${vars.tags}"/>
+                                            </tags>
+                                        </aws:ec2-run-instances>
+                                        <properties name="Extract Instance Id Property">
+                                            <values>
+                                                <value key="ojdeploy.instance.id" value="${createInstance.responseInstanceIds[0]}"/>
+                                            </values>
+                                        </properties>
+                                    </jobs>
+                                </cascade>
+                                <properties name="Extract Existing Instance Id Property">
+                                    <values>
+                                        <value key="ojdeploy.instance.id" value="${findInstance.responseInstanceIds[0]}"/>
+                                    </values>
+                                </properties>
+                            </jobs>
+                        </state:if>
+                    </jobs>
+                </cascade>
+                <oddjob file="${oddjob.dir}/../src/test/resources/org/oddjob/aws/CheckInstanceState.xml" id="checkRunning" name="Check Instance Running">
+                    <properties>
+                        <properties>
+                            <values>
+                                <value key="instance.id" value="${ojdeploy.instance.id}"/>
+                                <value key="expected.state" value="running"/>
+                            </values>
+                        </properties>
+                    </properties>
+                </oddjob>
+                <properties name="Extract DNS name Property">
+                    <values>
+                        <value key="ojdeploy.instance.publicDns" value="${checkRunning/describeInstance.detailById(${ojdeploy.instance.id}).publicDnsName}"/>
+                    </values>
+                </properties>
+                <scheduling:retry name="Retry SSH " xmlns:scheduling="http://rgordon.co.uk/oddjob/scheduling">
+                    <schedule>
+                        <schedules:count count="2" xmlns:schedules="http://rgordon.co.uk/oddjob/schedules">
+                            <refinement>
+                                <schedules:after>
+                                    <schedule>
+                                        <schedules:interval interval="0:00:05"/>
+                                    </schedule>
+                                </schedules:after>
+                            </refinement>
+                        </schedules:count>
+                    </schedule>
+                    <job>
+                        <ssh:cascade xmlns:ssh="oddjob:ssh">
+                            <connection>
+                                <ssh:connection host="${ojdeploy.instance.publicDns}" user="${ojdeploy.aws.user}">
+                                    <keyIdentityProvider>
+                                        <ssh:file-keypair>
+                                            <keyFiles>
+                                                <file file="${ojdeploy.key.file}"/>
+                                            </keyFiles>
+                                        </ssh:file-keypair>
+                                    </keyIdentityProvider>
+                                </ssh:connection>
+                            </connection>
+                            <jobs>
+                                <ssh:scp name="Copy Oddjob" remote="oddjob.tar.gz">
+                                    <from>
+                                        <file file="${ojdeploy.oddjob.zip}"/>
+                                    </from>
+                                </ssh:scp>
+                                <ssh:exec command="tar -zxvf oddjob.tar.gz" name="Unzip Oddjob"/>
+                                <ssh:exec command="sudo amazon-linux-extras enable corretto8" name="Enable Corretto8"/>
+                                <ssh:exec command="sudo yum clean metadata" name="Clean Metadata"/>
+                                <ssh:exec command="sudo yum install -y java-1.8.0-amazon-corretto" name="Install Corretto8"/>
+                            </jobs>
+                        </ssh:cascade>
+                    </job>
+                </scheduling:retry>
+                <ssh:exec command="nohup java -jar oddjob/run-oddjob.jar -f oddjob/server-web.xml &lt; /dev/null &gt; nohup.out 2&gt;&amp;1 &amp;" name="Run Oddjob" xmlns:ssh="oddjob:ssh">
+                    <connection>
+                        <ssh:connection host="${ojdeploy.instance.publicDns}" user="${ojdeploy.aws.user}">
+                            <keyIdentityProvider>
+                                <ssh:file-keypair>
+                                    <keyFiles>
+                                        <file file="${ojdeploy.key.file}"/>
+                                    </keyFiles>
+                                </ssh:file-keypair>
+                            </keyIdentityProvider>
+                        </ssh:connection>
+                    </connection>
+                </ssh:exec>
+                <folder>
+                    <jobs>
+                        <ssh:exec command="ps axf | grep oddjob | grep -v grep | awk '{print $1}'" name="Oddjob Pid" xmlns:ssh="oddjob:ssh">
+                            <connection>
+                                <ssh:connection host="${ojdeploy.instance.publicDns}" user="${ojdeploy.aws.user}">
+                                    <keyIdentityProvider>
+                                        <ssh:file-keypair>
+                                            <keyFiles>
+                                                <file file="${ojdeploy.key.file}"/>
+                                            </keyFiles>
+                                        </ssh:file-keypair>
+                                    </keyIdentityProvider>
+                                </ssh:connection>
+                            </connection>
+                        </ssh:exec>
+                        <ssh:exec command="ps axf | grep oddjob | grep -v grep | awk '{print &quot;kill &quot; $1}' | sh" name="Kill Oddjob" xmlns:ssh="oddjob:ssh">
+                            <connection>
+                                <ssh:connection host="${ojdeploy.instance.publicDns}" user="${ojdeploy.aws.user}">
+                                    <keyIdentityProvider>
+                                        <ssh:file-keypair>
+                                            <keyFiles>
+                                                <file file="${ojdeploy.key.file}"/>
+                                            </keyFiles>
+                                        </ssh:file-keypair>
+                                    </keyIdentityProvider>
+                                </ssh:connection>
+                            </connection>
+                        </ssh:exec>
+                        <ssh:exec command="tail -f nohup.out" name="Tail Out" xmlns:ssh="oddjob:ssh">
+                            <connection>
+                                <ssh:connection host="${ojdeploy.instance.publicDns}" user="${ojdeploy.aws.user}">
+                                    <keyIdentityProvider>
+                                        <ssh:file-keypair>
+                                            <keyFiles>
+                                                <file file="${ojdeploy.key.file}"/>
+                                            </keyFiles>
+                                        </ssh:file-keypair>
+                                    </keyIdentityProvider>
+                                </ssh:connection>
+                            </connection>
+                        </ssh:exec>
+                    </jobs>
+                </folder>
+            </jobs>
+        </cascade>
+    </job>
+</oddjob>
