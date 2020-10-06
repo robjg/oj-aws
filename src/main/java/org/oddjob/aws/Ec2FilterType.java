@@ -12,8 +12,18 @@ import java.util.Optional;
  */
 public class Ec2FilterType implements ValueFactory<Filter> {
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name of the thing being filtered.
+     * @oddjob.required Yes.
+     */
     private String name;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Comma separated list of values to filter on.
+     * @oddjob.required Yes.
+     */
     private String[] values;
 
     @Override

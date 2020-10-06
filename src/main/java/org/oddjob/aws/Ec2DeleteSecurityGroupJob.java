@@ -9,12 +9,26 @@ import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupResponse;
 
 import java.util.Optional;
 
+/**
+ * @oddjob.description Delete a Security Group.
+ *
+ */
 public class Ec2DeleteSecurityGroupJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2DeleteSecurityGroupJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Id of the Security Group to be deleted.
+     * @oddjob.required Yes, or the name.
+     */
     private String groupId;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name of the Security Group to be deleted.
+     * @oddjob.required Yes, or the Id.
+     */
     private String groupName;
 
     @Override

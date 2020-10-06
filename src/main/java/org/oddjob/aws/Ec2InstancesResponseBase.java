@@ -11,14 +11,39 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Common functionality for jobs that return Instances as their response.
+ */
 abstract public class Ec2InstancesResponseBase extends Ec2Base {
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Instance objects returned in the response.
+     * @oddjob.required Read only.
+     */
     private List<Instance> instances;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Provide some details as a bean so they can be easily accessed in
+     * expressions. The bean properties exposed from the response are currently {@code state},
+     * {@code publicIpAddress} and {@code publicDnsName}.
+     * @oddjob.required Read only.
+     */
     private Map<String, Ec2DescribeInstancesJob.InstanceBean> detailById;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The number of instances in the response.
+     * @oddjob.required Read only.
+     */
     private int size;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Instance Ids in the response.
+     * @oddjob.required Read only.
+     */
     private String[] responseInstanceIds;
 
     protected void populateInstances(List<Instance> instances) {

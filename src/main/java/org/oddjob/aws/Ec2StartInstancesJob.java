@@ -9,10 +9,19 @@ import software.amazon.awssdk.services.ec2.model.StartInstancesResponse;
 
 import java.util.Optional;
 
+/**
+ * @oddjob.description Start EC2 Instances.
+ *
+ */
 public class Ec2StartInstancesJob extends Ec2InstanceStateChangeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2StartInstancesJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description A comma separated list of the Ids of the instances to start.
+     * @oddjob.required Yes.
+     */
     private String[] instanceIds;
 
     @Override

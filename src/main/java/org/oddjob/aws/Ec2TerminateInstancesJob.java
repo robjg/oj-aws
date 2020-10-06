@@ -9,10 +9,19 @@ import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
 
 import java.util.Optional;
 
+/**
+ * @oddjob.description Terminate EC2 Instances.
+ *
+ */
 public class Ec2TerminateInstancesJob extends Ec2InstanceStateChangeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2TerminateInstancesJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description A comma separated list of the Ids of the instances to terminate.
+     * @oddjob.required Yes.
+     */
     private String[] instanceIds;
 
     @Override

@@ -15,18 +15,48 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * @oddjob.description Create an EC2 Key Pair.
+ *
+ */
 public class Ec2CreateKeyPairJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2CreateKeyPairJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name to be given to the Key Pair.
+     * @oddjob.required Yes.
+     */
     private String keyName;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The stream to write the key to. This is the key file that will
+     * allow an SSH connection to the instances associated.
+     * @oddjob.required No, but pointless if missing.
+     */
     private OutputStream output;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Tags to attach to the key.
+     * @oddjob.required No.
+     */
     private Map<String, String> tags;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The id of the key created.
+     * @oddjob.required Read only.
+     */
     private String keyPairId;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The fingerprint of the key created.
+     * @oddjob.required Read only.
+     */
     private String fingerprint;
 
     @Override

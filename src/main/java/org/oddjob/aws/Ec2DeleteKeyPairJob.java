@@ -9,13 +9,27 @@ import software.amazon.awssdk.services.ec2.model.DeleteKeyPairResponse;
 
 import java.util.Optional;
 
+/**
+ * @oddjob.description Delete an EC2 Key Pair.
+ *
+ */
 public class Ec2DeleteKeyPairJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2DeleteKeyPairJob.class);
 
-    private String keyName;
-
+    /**
+     * @oddjob.property
+     * @oddjob.description The Id of the Key Pair to be deleted.
+     * @oddjob.required Yes, or the name.
+     */
     private String keyPairId;
+
+    /**
+     * @oddjob.property
+     * @oddjob.description The name of the key pair to be deleted.
+     * @oddjob.required Yes, or the Id.
+     */
+    private String keyName;
 
     @Override
     protected void withEc2(Ec2Client ec2) {

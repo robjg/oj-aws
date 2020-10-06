@@ -10,15 +10,34 @@ import software.amazon.awssdk.services.ec2.model.IpPermission;
 
 import java.util.Optional;
 
-
+/**
+ * @oddjob.description Authorize an EC2 Security Group. Currently only supports adding inbound
+ * rules to the group.
+ *
+ */
 public class Ec2AuthorizeSecurityGroupJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2AuthorizeSecurityGroupJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The id of the group.
+     * @oddjob.required Yes, or the group name.
+     */
     private String groupId;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name of the group.
+     * @oddjob.required Yes, or the group id.
+     */
     private String groupName;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The inbound permissions.
+     * @oddjob.required Yes.
+     */
     private IpPermission[] inboundPermissions;
 
     @Override

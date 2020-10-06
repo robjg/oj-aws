@@ -17,10 +17,25 @@ public class Ec2DescribeInstancesJob extends Ec2InstancesResponseBase {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2DescribeInstancesJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Ids of the Instances to describe.
+     * @oddjob.required Yes, or the filters.
+     */
     private String[] instanceIds;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Filters to find instances to describe.
+     * @oddjob.required Yes, or the Ids.
+     */
     private Filter[] filters;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Provided by the response. They contain instances.
+     * @oddjob.required Read only.
+     */
     private List<Reservation> reservations;
 
     @Override

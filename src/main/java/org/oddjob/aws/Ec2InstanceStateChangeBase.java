@@ -10,15 +10,41 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Common functionality for jobs that change the state of an instance and must process an
+ * Instance State Change response.
+ */
 abstract public class Ec2InstanceStateChangeBase extends Ec2Base {
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Instance State Change objects returned in the response.
+     * @oddjob.required Read only.
+     */
     private List<InstanceStateChange> stateChanges;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Provide some details as a bean so they can be easily accessed in
+     * expressions. The bean properties exposed from the response are currently
+     * {@code previousState} and {@code currentState}.
+     * @oddjob.required Read only.
+     */
     private Map<String, InstanceStateChangeBean> detailById;
 
-    private String[] responseInstanceIds;
-
+    /**
+     * @oddjob.property
+     * @oddjob.description The number of Instance State Changes in the response.
+     * @oddjob.required Read only.
+     */
     private int size;
+
+    /**
+     * @oddjob.property
+     * @oddjob.description The Instance Ids in the response.
+     * @oddjob.required Read only.
+     */
+    private String[] responseInstanceIds;
 
 
     protected void populateStateChanges(List<InstanceStateChange> stateChanges) {

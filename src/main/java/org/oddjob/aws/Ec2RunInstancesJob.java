@@ -15,26 +15,66 @@ import java.util.Optional;
 /**
  * @oddjob.description Create new EC2 Instances.
  *
- *
  */
 public class Ec2RunInstancesJob extends Ec2InstancesResponseBase {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2RunInstancesJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Image Id for the Instance being created.
+     * @oddjob.required Yes.
+     */
     private String imageId;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The type of the image being created.
+     * @oddjob.required Yes.
+     */
     private String instanceType;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The minimum number of instances to be created.
+     * @oddjob.required No, defaults to 1.
+     */
     private int minCount;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The maximum number of instances to be created.
+     * @oddjob.required No, defaults to 1.
+     */
     private int maxCount;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name of the Key used to access the instance.
+     * @oddjob.required No, but pointless if not provided.
+     */
     private String keyName;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Security Group Ids into which to place the new instances.
+     * @oddjob.required No, but pointless if not provided.
+     */
     private String[] securityGroupIds;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Security Group names into which to place the new instances.
+     * Here because the SDK API supports it but Ids are preferred.
+     * @oddjob.required No.
+     */
     private String[] securityGroups;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Tags to attach to the newly created instances.
+     * @oddjob.required No.
+     */
     private Map<String, String> tags;
 
     @Override

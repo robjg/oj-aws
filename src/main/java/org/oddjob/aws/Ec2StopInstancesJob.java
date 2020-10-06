@@ -9,10 +9,19 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
 
 import java.util.Optional;
 
+/**
+ * @oddjob.description Stop EC2 Instances.
+ *
+ */
 public class Ec2StopInstancesJob extends Ec2InstanceStateChangeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2RunInstancesJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description A comma separated list of the Ids of the instances to stop.
+     * @oddjob.required Yes.
+     */
     private String[] instanceIds;
 
     @Override

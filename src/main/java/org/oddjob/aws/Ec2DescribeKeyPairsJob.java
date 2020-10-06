@@ -17,24 +17,61 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @oddjob.description Describe EC2 Security Groups.
+ * @oddjob.description Describe EC2 Key Pairs.
  */
 public class Ec2DescribeKeyPairsJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2DescribeKeyPairsJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Ids of the Key Pairs to describe.
+     * @oddjob.required Yes, or names or filters.
+     */
     private String[] keyPairIds;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Key Names of the Key Pairs to describe.
+     * @oddjob.required Yes, or the Ids, or filters.
+     */
     private String[] keyNames;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Filters to find key pairs to describe.
+     * @oddjob.required Yes, or the Ids or the names.
+     */
     private Filter[] filters;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Key Pair Info objects from the response.
+     * @oddjob.required Read Only.
+     */
     private List<KeyPairInfo> keyPairs;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Provide some details as a bean so they can be easily accessed in
+     * expressions. The bean properties exposed from the response are currently {@code keyName},
+     * and {@code keyFingerprint}.
+     * @oddjob.required Read only.
+     */
     private Map<String, KeyPairBean> detailById;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The number of key pairs in the response.
+     * @oddjob.required Read only.
+     */
     private int size;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Key Pair Ids in the response.
+     * @oddjob.required Read only.
+     */
     private String[] responseKeyPairIds;
 
     @Override
@@ -139,27 +176,27 @@ public class Ec2DescribeKeyPairsJob extends Ec2Base {
 
     public static class KeyPairBean {
 
-        private final String groupName;
+        private final String keyName;
 
-        private final String description;
+        private final String keyFingerprint;
 
         KeyPairBean(KeyPairInfo securityGroup) {
-            this.groupName = securityGroup.keyName();
-            this.description = securityGroup.keyFingerprint();
+            this.keyName = securityGroup.keyName();
+            this.keyFingerprint = securityGroup.keyFingerprint();
         }
 
-        public String getGroupName() {
-            return groupName;
+        public String getKeyName() {
+            return keyName;
         }
 
-        public String getDescription() {
-            return description;
+        public String getKeyFingerprint() {
+            return keyFingerprint;
         }
 
         @Override
         public String toString() {
-            return "SecurityGroupBean{" +
-                    "groupName='" + groupName + '\'' +
+            return "KeyPairBean{" +
+                    "keyName='" + keyName + '\'' +
                     '}';
         }
     }

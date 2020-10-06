@@ -12,20 +12,46 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * @oddjob.description Create an EC2 Security Group.
  *
  */
 public class Ec2CreateSecurityGroupJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2CreateSecurityGroupJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name to be given to the Security Group to be created.
+     * @oddjob.required Yes.
+     */
     private String groupName;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description A description for the Security Group.
+     * @oddjob.required No.
+     */
     private String description;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Id of a VPC (Virtual Private Cloud) to attach the group to.
+     * @oddjob.required No.
+     */
     private String vpcId;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Tags to attach to the newly created group.
+     * @oddjob.required No.
+     */
     private Map<String, String> tags;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The id of the group created.
+     * @oddjob.required Read only.
+     */
     private String groupId;
 
     @Override

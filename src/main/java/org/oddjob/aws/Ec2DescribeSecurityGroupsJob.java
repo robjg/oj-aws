@@ -23,18 +23,55 @@ public class Ec2DescribeSecurityGroupsJob extends Ec2Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2DescribeSecurityGroupsJob.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Ids of the Security Groups to describe.
+     * @oddjob.required Yes, or names or filters.
+     */
     private String[] groupIds;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Group Names of the Security Groups to describe.
+     * @oddjob.required Yes, or the Ids, or filters.
+     */
     private String[] groupNames;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Filters to find Security Groups to describe.
+     * @oddjob.required Yes, or the Ids or the names.
+     */
     private Filter[] filters;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Security Group objects from the response.
+     * @oddjob.required Read Only.
+     */
     private List<SecurityGroup> securityGroups;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description Provide some details as a bean so they can be easily accessed in
+     * expressions. The bean properties exposed from the response are currently {@code groupName},
+     * and {@code description}.
+     * @oddjob.required Read only.
+     */
     private Map<String, SecurityGroupBean> detailById;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The number of security groups in the response.
+     * @oddjob.required Read only.
+     */
     private int size;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The Group Ids in the response.
+     * @oddjob.required Read only.
+     */
     private String[] responseGroupIds;
 
     @Override
