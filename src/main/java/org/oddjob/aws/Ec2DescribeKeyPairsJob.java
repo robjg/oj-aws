@@ -47,7 +47,6 @@ public class Ec2DescribeKeyPairsJob extends Ec2Base {
     /**
      * @oddjob.property
      * @oddjob.description The Key Pair Info objects from the response.
-     * @oddjob.required Read Only.
      */
     private List<KeyPairInfo> keyPairs;
 
@@ -56,21 +55,18 @@ public class Ec2DescribeKeyPairsJob extends Ec2Base {
      * @oddjob.description Provide some details as a bean so they can be easily accessed in
      * expressions. The bean properties exposed from the response are currently {@code keyName},
      * and {@code keyFingerprint}.
-     * @oddjob.required Read only.
      */
     private Map<String, KeyPairBean> detailById;
 
     /**
      * @oddjob.property
      * @oddjob.description The number of key pairs in the response.
-     * @oddjob.required Read only.
      */
     private int size;
 
     /**
      * @oddjob.property
      * @oddjob.description The Key Pair Ids in the response.
-     * @oddjob.required Read only.
      */
     private String[] responseKeyPairIds;
 

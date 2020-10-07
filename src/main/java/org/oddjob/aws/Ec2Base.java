@@ -20,8 +20,20 @@ abstract public class Ec2Base implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2Base.class);
 
+    /**
+     * @oddjob.property
+     * @oddjob.description The name of the job. Can be any text.
+     * @oddjob.required No.
+     */
     private String name;
 
+    /**
+     * @oddjob.property
+     * @oddjob.description A Credential Provider. Defaults to the Profile Credential Provider using
+     * the default credential file as specified in the AWS SDK Guide
+     * <a href=https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/setup-credentials.html>here</a>.
+     * @oddjob.required No.
+     */
     private AwsCredentialsProvider credentialsProvider;
 
     @Override

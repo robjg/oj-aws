@@ -19,7 +19,6 @@ abstract public class Ec2InstanceStateChangeBase extends Ec2Base {
     /**
      * @oddjob.property
      * @oddjob.description The Instance State Change objects returned in the response.
-     * @oddjob.required Read only.
      */
     private List<InstanceStateChange> stateChanges;
 
@@ -28,21 +27,18 @@ abstract public class Ec2InstanceStateChangeBase extends Ec2Base {
      * @oddjob.description Provide some details as a bean so they can be easily accessed in
      * expressions. The bean properties exposed from the response are currently
      * {@code previousState} and {@code currentState}.
-     * @oddjob.required Read only.
      */
     private Map<String, InstanceStateChangeBean> detailById;
 
     /**
      * @oddjob.property
      * @oddjob.description The number of Instance State Changes in the response.
-     * @oddjob.required Read only.
      */
     private int size;
 
     /**
      * @oddjob.property
      * @oddjob.description The Instance Ids in the response.
-     * @oddjob.required Read only.
      */
     private String[] responseInstanceIds;
 

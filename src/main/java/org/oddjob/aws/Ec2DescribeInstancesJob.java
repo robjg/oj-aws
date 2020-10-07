@@ -34,7 +34,6 @@ public class Ec2DescribeInstancesJob extends Ec2InstancesResponseBase {
     /**
      * @oddjob.property
      * @oddjob.description Provided by the response. They contain instances.
-     * @oddjob.required Read only.
      */
     private List<Reservation> reservations;
 
