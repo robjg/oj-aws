@@ -123,7 +123,7 @@
                         </state:if>
                     </jobs>
                 </cascade>
-                <oddjob file="${oddjob.dir}/../src/test/resources/org/oddjob/aws/CheckInstanceState.xml" id="checkRunning" name="Check Instance Running">
+                <oddjob file="${oddjob.dir}/CheckInstanceState.xml" id="checkRunning" name="Check Instance Running">
                     <properties>
                         <properties>
                             <values>

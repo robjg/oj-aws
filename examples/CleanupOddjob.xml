@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<oddjob id="oddjob">
+    <job>
+        <cascade>
+            <jobs>
+                <properties name="Setup Properties">
+                    <values>
+                        <value key="ojdeploy.aws.dir" value="${user.home}/.aws"/>
+                        <value key="ojdeploy.key.name" value="OddjobKeyPair"/>
+                        <file file="${ojdeploy.aws.dir}/${ojdeploy.key.name}.pem" key="ojdeploy.key.file"/>
+                        <value key="ojdeploy.security.group.name" value="Oddjob-Deploy-SG"/>
+                    </values>
+                </properties>
+                <variables id="vars">
+                    <tags>
+                        <map>
+                            <values>
+                                <value key="purpose" value="OddjobDeploy"/>
+                            </values>
+                        </map>
+                    </tags>
+                    <filters>
+                        <list>
+                            <values>
+                                <aws:ec2-filter name="tag:purpose" values="OddjobDeploy" xmlns:aws="oddjob:aws"/>
+                            </values>
+                        </list>
+                    </filters>
+                </variables>
+                <sequential id="cleanupInstances" name="Cleanup Up Instances">
+                    <jobs>
+                        <aws:ec2-describe-instances id="findInstancesToClean" name="Find Instances To Clean" xmlns:aws="oddjob:aws">
+                            <filters>
+                                <value value="${vars.filters}"/>
+                            </filters>
+                        </aws:ec2-describe-instances>
+                        <aws:ec2-terminate-instances instanceIds="${findInstancesToClean.responseInstanceIds}" xmlns:aws="oddjob:aws"/>
+                    </jobs>
+                </sequential>
+                <aws:ec2-delete-security-group groupName="${ojdeploy.security.group.name}" name="Delete Security Group" xmlns:aws="oddjob:aws"/>
+                <cascade name="Clean Up Key Pairs">
+                    <jobs>
+                        <aws:ec2-describe-key-pairs id="testKeyPairs" keyNames="${ojdeploy.key.name}" name="Find Oddjob Key Pair" xmlns:aws="oddjob:aws"/>
+                        <aws:ec2-delete-key-pair keyName="${ojdeploy.key.name}" name="Delete Key Pair" xmlns:aws="oddjob:aws"/>
+                        <delete name="Delete Key File">
+                            <files>
+                                <file file="${ojdeploy.key.file}"/>
+                            </files>
+                        </delete>
+                    </jobs>
+                </cascade>
+            </jobs>
+        </cascade>
+    </job>
+</oddjob>
