@@ -15,6 +15,7 @@ import org.oddjob.arooa.standard.StandardArooaSession;
 import org.oddjob.arooa.xml.XMLConfiguration;
 import org.oddjob.tools.OddjobTestHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
@@ -29,10 +30,12 @@ class Ec2CreateKeyPairJobTest {
     @Test
     public void testDesign() throws ArooaParseException {
 
+
+
         String xml =
                 "<aws:ec2-create-key-pair keyName=\"SomeKey\" name=\"Our Test\" xmlns:aws=\"oddjob:aws\">\n" +
                         "    <output>\n" +
-                        "        <file file=\"MyKeys.pem\"/>\n" +
+                        "        <bean class=\"" + ByteArrayOutputStream.class.getName() + "\"/>\n" +
                         "    </output>\n" +
                         "    <tags>\n" +
                         "        <map>\n" +
@@ -68,7 +71,7 @@ class Ec2CreateKeyPairJobTest {
         assertThat(tags.get("flavour"), is("chocolate"));
     }
 
-    public static void main(String args[]) throws ArooaParseException {
+    public static void main(String[] args) throws ArooaParseException {
 
         Ec2CreateKeyPairJobTest test = new Ec2CreateKeyPairJobTest();
         test.testDesign();
