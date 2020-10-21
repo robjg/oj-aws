@@ -35,6 +35,21 @@
                             </filters>
                         </aws:ec2-describe-instances>
                         <aws:ec2-terminate-instances instanceIds="${findInstancesToClean.responseInstanceIds}" xmlns:aws="oddjob:aws"/>
+                        <properties name="Extract Existing Instance Id Property">
+                            <values>
+                                <value key="ojdeploy.instance.id" value="${findInstancesToClean.responseInstanceIds[0]}"/>
+                            </values>
+                        </properties>
+                        <oddjob file="${oddjob.dir}/CheckInstanceState.xml" id="checkRunning" name="Check Instance Terminated">
+                            <properties>
+                                <properties>
+                                    <values>
+                                        <value key="instance.id" value="${ojdeploy.instance.id}"/>
+                                        <value key="expected.state" value="terminated"/>
+                                    </values>
+                                </properties>
+                            </properties>
+                        </oddjob>
                     </jobs>
                 </sequential>
                 <aws:ec2-delete-security-group groupName="${ojdeploy.security.group.name}" name="Delete Security Group" xmlns:aws="oddjob:aws"/>
