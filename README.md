@@ -14,3 +14,5 @@ These are Jobs for:
 For an Example of how to use them see the 
 [Deploy Oddjob Configuration](examples/DeployOddjob.xml)
 
+This code is experimental and not currently being 
+actively maintained.
